@@ -1,67 +1,65 @@
 # Common Chinese Characters Learner - Product Requirements Document (PRD)
 
-## 1. Project Overview
+## 1. Overview
 **Project Name**: Common Chinese Characters Learner
 **Description**: A web-based tool for learning the 7,000 common Chinese characters from the *Modern Chinese Common Character Table*. Supports four modes: **Learn, Review, Quiz, and Challenge**, with statistical estimation of character mastery.
 
 ## 2. Core Features
 ### 2.1 Learn Mode
-- **Interaction Logic**:
-  - Click a character box to display a random character from the 7,000-character set.
-  - Shows the character's **pinyin** and **definition**.
+- **Interaction**:
+  - Click to display a random character with its **pinyin** and **definition**.
   - Optional **audio pronunciation**.
 - **Data Source**:
-  - Imported from [Zdic.net](https://www.zdic.net/) or open-source datasets like [chinese-dictionary](https://github.com/skishore/chinese-dictionary).
+  - Import 7,000 characters from [Zdic.net](https://www.zdic.net/) or open-source datasets like [chinese-dictionary](https://github.com/skishore/chinese-dictionary).
 
 ### 2.2 Review Mode
-- **Interaction Logic**:
-  - Displays characters learned in the current session, with their pinyin.
-  - Click a character to show its detailed definition.
-  - Traverse through learned characters by clicking the large character display.
+- **Interaction**:
+  - Displays characters learned in the current session.
+  - Click a character to show its definition.
   - Toggle to show/hide unmastered characters (grayed out).
 - **Data Management**:
-  - Tracks user progress and mastery status (e.g., "mastered" or "needs review").
+  - Track user progress and mastery status (e.g., "mastered" or "needs review").
 
 ### 2.3 Quiz Mode
-- **Interaction Logic**:
+- **Interaction**:
   - Randomly or sequentially displays characters from the current batch.
   - User inputs pinyin (tones optional).
-  - **Multi-tone Characters**: Any correct pinyin is accepted.
+  - **Multi-tone characters**: Any correct pinyin is accepted.
   - **Feedback**:
     - Correct: Green text + displays all correct pinyin.
     - Incorrect: Red text + displays correct pinyin.
-  - Navigate with Enter or by clicking the character box.
+  - Navigate with Enter or click.
 
 ### 2.4 Challenge Mode
-- **Statistical Principle**:
+- **Statistics**:
   - Randomly selects characters from the full 7,000-character set.
-  - Estimates user's character mastery based on the proportion of correct answers.
-  - **Confidence Interval**: Uses normal distribution approximation.
-  - The more questions answered, the more accurate the estimate.
-- **Data Visualization**:
+  - Estimates **character mastery** using **sampling without replacement** and **normal distribution confidence intervals**.
+  - The more answers, the more accurate the estimate.
+  - If all 7,000 characters are answered, the confidence interval width becomes zero (100% mastery).
+- **Visualization**:
   - Real-time display of **accuracy rate**, **estimated mastery**, and **confidence interval**.
 
 ## 3. Technical Implementation
-### 3.1 Frontend Framework
-- **Recommended**: Vue 3 + Vite (lightweight, responsive, easy to use).
+### 3.1 Frontend
+- **Framework**: Vue 3 / React + Vite.
 - **UI Components**:
-  - Character cards (display character, pinyin, definition).
-  - Input fields (quiz/challenge mode).
-  - Progress bars (review mode).
-  - Charts (ECharts/Chart.js for challenge mode visualization).
+  - Character card (displays character, pinyin, definition).
+  - Input field (quiz/challenge mode).
+  - Progress bar (review mode).
+  - Stats chart (challenge mode, using ECharts/Chart.js).
 
 ### 3.2 Data Management
 - **Character Data**:
-  - Formatted as JSON:
+  - Format: JSON
     ```json
     {
       "character": "汉",
       "pinyin": ["hàn", "hán"],
-      "definition": "1. The Chinese people. 2. Man..."
+      "definition": "1. Chinese ethnicity. 2. Man..."
     }
     ```
 - **User Data**:
-  - Stored in IndexedDB (learning progress, quiz history).
+  - Store progress in IndexedDB.
   - Example:
     ```json
     {
@@ -73,41 +71,36 @@
     ```
 
 ### 3.3 Backend (Optional)
-- **Pure Frontend**: Use static JSON files + frontend logic if data volume is small.
-- **Backend Service** (for cloud sync):
-  - Use Supabase or Firebase to store user data.
+- **Pure Frontend**: Use static JSON + frontend logic if data is small.
+- **Backend Service**: Use Supabase/Firebase for cloud sync.
   - API Endpoints:
     - `GET /chars`: Fetch character list.
     - `POST /progress`: Update learning progress.
 
-### 3.4 Pinyin Validation Logic
-- **Multi-tone Handling**:
-  - Store all possible pinyin (e.g., "行": xíng/háng).
-  - User input matches any correct pinyin.
-- **Fuzzy Matching**:
-  - Ignore tones (e.g., input `han` matches `hàn/hán`).
-  - Regex validation:
-    ```javascript
-    const isCorrect = userInput === charData.pinyin.some(pinyin => pinyin.replace(/[1-4]/g, ''));
-    ```
+### 3.4 Pinyin Validation
+- **Multi-tone Handling**: Store all possible pinyin (e.g., "行": xíng/háng).
+- **Fuzzy Matching**: Ignore tones (e.g., input `han` matches `hàn/hán`).
+  ```javascript
+  const isCorrect = userInput === charData.pinyin.some(p => p.replace(/[1-4]/g, ''));
+  ```
 
 ### 3.5 Statistical Estimation (Challenge Mode)
 - **Sampling Without Replacement**:
-  - Randomly sample from N=7,000 characters.
-  - Estimate mastery proportion: `p = k/n` (k = correct answers, n = total questions).
-  - **Confidence Interval** (95%):
+  - Randomly sample `n` characters from `N=7000`.
+  - Correct answers: `k`. Estimate mastery: `p = k/n`.
+  - 95% Confidence Interval:
     ```javascript
-    const z = 1.96; // 95% confidence level
+    const z = 1.96; // 95% confidence
     const marginOfError = z * Math.sqrt(p * (1 - p) / n);
     const confidenceInterval = [p - marginOfError, p + marginOfError];
     ```
-- **Mastery Estimation**:
-  - Estimated characters known: `estimated = p * 7000`.
+- **Mastery Estimate**:
+  - Estimated characters known: `p * 7000`.
   - Confidence interval: `[7000*(p - marginOfError), 7000*(p + marginOfError)]`.
 
 ## 4. Prototype Development Steps
 1. **Data Preparation**:
-   - Scrape or manually curate 7,000-character JSON dataset.
+   - Scrape or manually curate 7,000 characters.
    - Example script (Python):
      ```python
      import requests
@@ -123,7 +116,7 @@
      ```
 
 2. **Frontend Setup**:
-   - Use Vue 3 to build the interface:
+   - Use Vue 3:
      ```bash
      npm create vue@latest hanzi-learner
      cd hanzi-learner
@@ -131,14 +124,14 @@
      ```
    - Core components:
      - `CharCard.vue`: Character display.
-     - `QuizInput.vue`: Quiz input field.
-     - `StatsChart.vue`: Challenge mode stats.
+     - `QuizInput.vue`: Quiz input.
+     - `StatsChart.vue`: Challenge stats.
 
 3. **Interaction Logic**:
    - Learn: Random character + pinyin/definition.
-   - Review: Traverse learned characters, toggle unmastered visibility.
-   - Quiz: Validate pinyin input, provide feedback.
-   - Challenge: Random sampling, calculate confidence intervals.
+   - Review: Traverse learned characters.
+   - Quiz: Validate pinyin input.
+   - Challenge: Random sampling + confidence intervals.
 
 4. **Deployment**:
    - Static hosting: Vercel/Netlify/GitHub Pages.
@@ -146,20 +139,20 @@
 
 ## 5. Extensions (Optional)
 - **Generate Calligraphy Sheets**: Export learned characters as PDF (using [pdf-lib](https://pdf-lib.js.org/)).
-- **Voice Input**: Support voice-to-text for pinyin (Web Speech API).
+- **Voice Input**: Use Web Speech API for pinyin input.
 - **Social Sharing**: Share progress on WeChat/Weibo.
 - **Mini Program**: Develop a WeChat mini program using UniApp/Taro.
 
 ## 6. Next Steps
 1. **Data Source**:
-   - Should I scrape character data from Zdic.net?
+   - Need help scraping Zdic.net’s 7,000 characters?
    - Or do you have an existing dataset?
 
 2. **Tech Stack**:
-   - Confirm: Vue 3 or React?
+   - Prefer **Vue 3** or **React**?
    - Need a backend (Supabase/Firebase)?
 
 3. **Priority**:
-   - Start with an MVP (e.g., Learn + Quiz modes)?
+   - Start with an **MVP** (e.g., Learn + Quiz modes)?
 
 ---
