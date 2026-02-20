@@ -1,5 +1,9 @@
 # 七千通用汉字学习工具 - 产品需求文档 (PRD)
 
+[English Version](PRD_en.md) | 中文
+
+---
+
 ## 1. 项目概述
 **项目名称**：七千通用汉字学习工具
 **英文名**：Common Chinese Characters Learner
